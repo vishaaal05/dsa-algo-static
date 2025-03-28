@@ -18,19 +18,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
     }
     const mid = Math.floor((start + end) / 2);
 
-    // Temporarily disable recursive animations to isolate the issue
-    // await controls.start((i) => ({
-    //   scale: i >= start && i < mid ? 1.2 : 1,
-    //   backgroundColor: i >= start && i < mid ? "#10B981" : "#4F46E5",
-    // }));
-    // await sleep(500);
-
-    // await controls.start((i) => ({
-    //   scale: i >= mid && i < end ? 1.2 : 1,
-    //   backgroundColor: i >= mid && i < end ? "#10B981" : "#4F46E5",
-    // }));
-    // await sleep(500);
-
     const left = await mergeSort(arr, start, mid);
     const right = await mergeSort(arr, mid, end);
 
@@ -41,10 +28,12 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
     }
 
     // Highlight merged section
+    console.log(`Animating merged section ${start}-${end}`);
     await controls.start((i) => ({
       scale: i >= start && i < end ? 1.2 : 1,
       backgroundColor: i >= start && i < end ? "#10B981" : "#4F46E5",
     }));
+    console.log(`Animation for ${start}-${end} completed`);
     await sleep(500);
 
     return arr.slice(start, end);
@@ -77,10 +66,12 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         end = i;
       }
 
+      console.log(`Animating Kadane's step ${i}`);
       await controls.start((idx) => ({
         scale: idx <= i ? 1.2 : 1,
         backgroundColor: idx <= i ? "#10B981" : "#4F46E5",
       }));
+      console.log(`Animation for Kadane's step ${i} completed`);
       await sleep(500);
     }
     console.log(`Kadane's result: maxSum=${maxSoFar}, subarray=${arr.slice(start, end + 1)}`);
@@ -94,10 +85,12 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
     while (left <= right) {
       const mid = Math.floor((left + right) / 2);
+      console.log(`Animating Binary Search step: mid=${mid}`);
       await controls.start((i) => ({
         scale: i === mid ? 1.2 : i >= left && i <= right ? 1.1 : 1,
         backgroundColor: i === mid ? "#10B981" : i >= left && i <= right ? "#4F46E5" : "#4F46E5",
       }));
+      console.log(`Animation for Binary Search step mid=${mid} completed`);
       await sleep(500);
 
       if (arr[mid] === target) {
@@ -122,10 +115,17 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
     try {
       console.log("Resetting elements");
-      await controls.start({
-        scale: 1,
-        backgroundColor: "#4F46E5",
+      await new Promise((resolve) => {
+        controls.start({
+          scale: 1,
+          backgroundColor: "#4F46E5",
+          transition: { duration: 0.3 },
+        }).then(resolve).catch((err) => {
+          console.error("Reset animation error:", err);
+          resolve(); // Continue even if animation fails
+        });
       });
+      console.log("Reset animation started");
       await sleep(200);
       console.log("Reset complete");
 
@@ -140,12 +140,14 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         await sleep(500);
 
         setSolvedData(sortedArray);
+        console.log("Animating solved array");
         await controls.start({
           scale: 1.2,
           backgroundColor: "#10B981",
         });
         await sleep(1000);
         await controls.start({ scale: 1 });
+        console.log("Solved array animation completed");
       } else if (algo.name === "Kadane's Algorithm") {
         console.log("Running Kadane's Algorithm");
         const { maxSum, subarray } = await kadanesAlgorithm([...algo.visualData]);
@@ -157,12 +159,14 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         await sleep(500);
 
         setSolvedData(subarray);
+        console.log("Animating solved array");
         await controls.start((i) => ({
           scale: i < subarray.length ? 1.2 : 1,
           backgroundColor: i < subarray.length ? "#10B981" : "#4F46E5",
         }));
         await sleep(1000);
         await controls.start({ scale: 1 });
+        console.log("Solved array animation completed");
       } else if (algo.name === "Binary Search") {
         console.log("Running Binary Search");
         const targetNum = parseInt(searchTarget, 10) || algo.target;
@@ -175,12 +179,14 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         await sleep(500);
 
         setSolvedData(targetIndex !== -1 ? [algo.visualData[targetIndex]] : ["Not Found"]);
+        console.log("Animating solved array");
         await controls.start((i) => ({
           scale: targetIndex === i ? 1.2 : 1,
           backgroundColor: targetIndex === i ? "#10B981" : targetIndex === -1 ? "#EF4444" : "#4F46E5",
         }));
         await sleep(1000);
         await controls.start({ scale: 1 });
+        console.log("Solved array animation completed");
       }
       console.log("Simulation completed successfully");
     } catch (error) {
@@ -254,7 +260,10 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
             className="p-2 rounded-md text-black w-32"
           />
           <button
-            onClick={runSimulation}
+            onClick={() => {
+              console.log("Run Simulation button clicked");
+              runSimulation();
+            }}
             disabled={isSimulating}
             className={`px-4 py-2 ${
               isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
@@ -267,7 +276,10 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
       {algo.name !== "Binary Search" && (
         <button
-          onClick={runSimulation}
+          onClick={() => {
+            console.log("Run Simulation button clicked");
+            runSimulation();
+          }}
           disabled={isSimulating}
           className={`mt-4 px-4 py-2 ${
             isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
