@@ -5,7 +5,7 @@ import ArrayVisual from "./ArrayVisual";
 const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [solvedData, setSolvedData] = useState(null);
-  const [searchTarget, setSearchTarget] = useState(algo.target || ""); // For Binary Search input
+  const [searchTarget, setSearchTarget] = useState(algo.target || "");
   const controls = useAnimation();
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -117,7 +117,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       await sleep(1000);
       await controls.start((i) => ({ scale: 1 }));
     } else if (algo.name === "Binary Search") {
-      const targetNum = parseInt(searchTarget, 10) || algo.target; // Use user input or default
+      const targetNum = parseInt(searchTarget, 10) || algo.target;
       const targetIndex = await binarySearch([...algo.visualData], targetNum);
       await controls.start((i) => ({
         scale: 1,
@@ -154,19 +154,43 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         <span className="text-lg font-semibold text-yellow-400">{algo.time}</span>
       </div>
 
-      <ArrayVisual
-        data={solvedData || algo.visualData}
-        highlightIndices={
-          hoveredAlgo === index && !isSimulating && !solvedData
-            ? algo.name === "Binary Search"
-              ? [3]
+      {/* Question Array */}
+      <div>
+        <p className="text-sm text-gray-400 mb-1">Question Array:</p>
+        <ArrayVisual
+          data={algo.visualData}
+          highlightIndices={
+            hoveredAlgo === index && !isSimulating && !solvedData
+              ? algo.name === "Binary Search"
+                ? [3]
+                : algo.name === "Kadane's Algorithm"
+                ? [3, 4, 5, 6]
+                : [0, 1]
+              : []
+          }
+          controls={controls}
+        />
+      </div>
+
+      {/* Solved Array */}
+      {solvedData && (
+        <div className="mt-4">
+          <p className="text-sm text-gray-400 mb-1">
+            {algo.name === "Merge Sort"
+              ? "Sorted Array:"
               : algo.name === "Kadane's Algorithm"
-              ? [3, 4, 5, 6]
-              : [0, 1]
-            : []
-        }
-        controls={controls}
-      />
+              ? "Max Subarray:"
+              : solvedData[0] === "Not Found"
+              ? "Result:"
+              : "Target Found:"}
+          </p>
+          <ArrayVisual
+            data={solvedData}
+            highlightIndices={[]}
+            controls={controls}
+          />
+        </div>
+      )}
 
       {algo.name === "Binary Search" && (
         <div className="mt-4 flex space-x-2">
@@ -199,18 +223,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         >
           {isSimulating ? "Simulating..." : "Run Simulation"}
         </button>
-      )}
-
-      {solvedData && (
-        <p className="mt-2 text-green-400">
-          {algo.name === "Merge Sort"
-            ? "Sorted Array"
-            : algo.name === "Kadane's Algorithm"
-            ? "Max Subarray"
-            : solvedData[0] === "Not Found"
-            ? "Target Not Found"
-            : "Target Found"}
-        </p>
       )}
 
       <AnimatePresence>

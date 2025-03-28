@@ -56,7 +56,7 @@ function App() {
       right = mid - 1
   return -1`,
       visualData: [2, 3, 4, 10, 40, 50, 60, 70],
-      target: 10, // Default target, will be overridden by user input
+      target: 50, // Default target, will be overridden by user input
     },
   ];
 
