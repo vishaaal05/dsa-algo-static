@@ -6,11 +6,11 @@ const ArrayVisual = ({ data, highlightIndices = [], controls }) => {
       {data.map((num, idx) => (
         <motion.div
           key={idx}
-          custom={idx} // Pass index for custom animation
+          custom={idx}
           className={`w-10 h-10 flex items-center justify-center rounded-md text-white font-bold ${
             highlightIndices.includes(idx) ? "bg-green-500" : "bg-indigo-600"
           }`}
-          animate={controls} // Apply animation controls
+          animate={controls}
           transition={{ duration: 0.3 }}
         >
           {num}
