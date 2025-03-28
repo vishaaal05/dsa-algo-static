@@ -2,7 +2,7 @@ import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useState } from "react";
 import ArrayVisual from "./ArrayVisual";
 
-const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
+const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [solvedData, setSolvedData] = useState(null);
   const [searchTarget, setSearchTarget] = useState(algo.target || "");
@@ -27,11 +27,10 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       arr[start + i] = merged[i];
     }
 
-    // Highlight merged section
     console.log(`Animating merged section ${start}-${end}`);
     await controls.start((i) => ({
       scale: i >= start && i < end ? 1.2 : 1,
-      backgroundColor: i >= start && i < end ? "#10B981" : "#4F46E5",
+      backgroundColor: i >= start && i < end ? (isDark ? "#10B981" : "#F9A8D4") : (isDark ? "#4F46E5" : "#C4B5FD"),
     }));
     console.log(`Animation for ${start}-${end} completed`);
     await sleep(500);
@@ -69,7 +68,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       console.log(`Animating Kadane's step ${i}`);
       await controls.start((idx) => ({
         scale: idx <= i ? 1.2 : 1,
-        backgroundColor: idx <= i ? "#10B981" : "#4F46E5",
+        backgroundColor: idx <= i ? (isDark ? "#10B981" : "#F9A8D4") : (isDark ? "#4F46E5" : "#C4B5FD"),
       }));
       console.log(`Animation for Kadane's step ${i} completed`);
       await sleep(500);
@@ -88,7 +87,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       console.log(`Animating Binary Search step: mid=${mid}`);
       await controls.start((i) => ({
         scale: i === mid ? 1.2 : i >= left && i <= right ? 1.1 : 1,
-        backgroundColor: i === mid ? "#10B981" : i >= left && i <= right ? "#4F46E5" : "#4F46E5",
+        backgroundColor: i === mid ? (isDark ? "#10B981" : "#F9A8D4") : i >= left && i <= right ? (isDark ? "#4F46E5" : "#C4B5FD") : (isDark ? "#4F46E5" : "#C4B5FD"),
       }));
       console.log(`Animation for Binary Search step mid=${mid} completed`);
       await sleep(500);
@@ -118,11 +117,11 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       await new Promise((resolve) => {
         controls.start({
           scale: 1,
-          backgroundColor: "#4F46E5",
+          backgroundColor: isDark ? "#4F46E5" : "#C4B5FD",
           transition: { duration: 0.3 },
         }).then(resolve).catch((err) => {
           console.error("Reset animation error:", err);
-          resolve(); // Continue even if animation fails
+          resolve();
         });
       });
       console.log("Reset animation started");
@@ -135,7 +134,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Merge Sort completed, sorted array:", sortedArray);
         await controls.start({
           scale: 1,
-          backgroundColor: "#4F46E5",
+          backgroundColor: isDark ? "#4F46E5" : "#C4B5FD",
         });
         await sleep(500);
 
@@ -143,7 +142,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Animating solved array");
         await controls.start({
           scale: 1.2,
-          backgroundColor: "#10B981",
+          backgroundColor: isDark ? "#10B981" : "#F9A8D4",
         });
         await sleep(1000);
         await controls.start({ scale: 1 });
@@ -154,7 +153,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Kadane's Algorithm completed");
         await controls.start({
           scale: 1,
-          backgroundColor: "#4F46E5",
+          backgroundColor: isDark ? "#4F46E5" : "#C4B5FD",
         });
         await sleep(500);
 
@@ -162,7 +161,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Animating solved array");
         await controls.start((i) => ({
           scale: i < subarray.length ? 1.2 : 1,
-          backgroundColor: i < subarray.length ? "#10B981" : "#4F46E5",
+          backgroundColor: i < subarray.length ? (isDark ? "#10B981" : "#F9A8D4") : (isDark ? "#4F46E5" : "#C4B5FD"),
         }));
         await sleep(1000);
         await controls.start({ scale: 1 });
@@ -174,7 +173,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Binary Search completed");
         await controls.start({
           scale: 1,
-          backgroundColor: "#4F46E5",
+          backgroundColor: isDark ? "#4F46E5" : "#C4B5FD",
         });
         await sleep(500);
 
@@ -182,7 +181,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         console.log("Animating solved array");
         await controls.start((i) => ({
           scale: targetIndex === i ? 1.2 : 1,
-          backgroundColor: targetIndex === i ? "#10B981" : targetIndex === -1 ? "#EF4444" : "#4F46E5",
+          backgroundColor: targetIndex === i ? (isDark ? "#10B981" : "#F9A8D4") : targetIndex === -1 ? (isDark ? "#EF4444" : "#FCA5A5") : (isDark ? "#4F46E5" : "#C4B5FD"),
         }));
         await sleep(1000);
         await controls.start({ scale: 1 });
@@ -199,41 +198,42 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
   return (
     <motion.div
-      className="relative bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-xl border border-gray-700/50 hover:shadow-2xl transition-all duration-300 w-full"
+      className={`relative ${isDark ? "bg-gray-800/50 border-gray-700/50" : "bg-blue-50/80 border-blue-200"} backdrop-blur-md p-6 rounded-xl shadow-xl border hover:shadow-2xl transition-all duration-300 w-full`}
       onMouseEnter={() => setHoveredAlgo(index)}
       onMouseLeave={() => setHoveredAlgo(null)}
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.2, duration: 0.6 }}
     >
-      <h2 className="text-3xl font-bold mb-3 text-cyan-300">{algo.name}</h2>
-      <p className="text-gray-300 mb-4">{algo.desc}</p>
+      <h2 className={`text-3xl font-bold mb-3 ${isDark ? "text-cyan-300" : "text-blue-600"}`}>{algo.name}</h2>
+      <p className={`mb-4 ${isDark ? "text-gray-300" : "text-gray-600"}`}>{algo.desc}</p>
 
       <div className="mb-4">
-        <span className="text-sm text-gray-400">Time Complexity: </span>
-        <span className="text-lg font-semibold text-yellow-400">{algo.time}</span>
+        <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>Time Complexity: </span>
+        <span className={`text-lg font-semibold ${isDark ? "text-yellow-400" : "text-yellow-600"}`}>{algo.time}</span>
       </div>
 
       <div>
-        <p className="text-sm text-gray-400 mb-1">Question Array:</p>
+        <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"} mb-1`}>Question Array:</p>
         <ArrayVisual
           data={algo.visualData}
           highlightIndices={
             hoveredAlgo === index && !isSimulating && !solvedData
               ? algo.name === "Binary Search"
-                ? [5] // Index of 50
+                ? [5]
                 : algo.name === "Kadane's Algorithm"
                 ? [3, 4, 5, 6]
                 : [0, 1]
               : []
           }
           controls={controls}
+          isDark={isDark}
         />
       </div>
 
       {solvedData && (
         <div className="mt-4">
-          <p className="text-sm text-gray-400 mb-1">
+          <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"} mb-1`}>
             {algo.name === "Merge Sort"
               ? "Sorted Array:"
               : algo.name === "Kadane's Algorithm"
@@ -246,6 +246,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
             data={solvedData}
             highlightIndices={[]}
             controls={controls}
+            isDark={isDark}
           />
         </div>
       )}
@@ -257,7 +258,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
             value={searchTarget}
             onChange={(e) => setSearchTarget(e.target.value)}
             placeholder="Enter number to search"
-            className="p-2 rounded-md text-black w-32"
+            className={`p-2 rounded-md ${isDark ? "text-black" : "text-gray-800 bg-gray-100"} w-32`}
           />
           <button
             onClick={() => {
@@ -266,7 +267,11 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
             }}
             disabled={isSimulating}
             className={`px-4 py-2 ${
-              isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
+              isSimulating
+                ? "bg-gray-500"
+                : isDark
+                ? "bg-cyan-500 hover:bg-cyan-600"
+                : "bg-blue-300 hover:bg-blue-400"
             } text-white rounded-md transition-colors`}
           >
             {isSimulating ? "Simulating..." : "Run Simulation"}
@@ -282,7 +287,11 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
           }}
           disabled={isSimulating}
           className={`mt-4 px-4 py-2 ${
-            isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
+            isSimulating
+              ? "bg-gray-500"
+              : isDark
+              ? "bg-cyan-500 hover:bg-cyan-600"
+              : "bg-blue-300 hover:bg-blue-400"
           } text-white rounded-md transition-colors`}
         >
           {isSimulating ? "Simulating..." : "Run Simulation"}
@@ -292,7 +301,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       <AnimatePresence>
         {hoveredAlgo === index && (
           <motion.pre
-            className="bg-gray-900/80 p-4 mt-4 rounded-md text-sm text-green-400 overflow-hidden"
+            className={`p-4 mt-4 rounded-md text-sm ${isDark ? "bg-gray-900/80 text-green-400" : "bg-gray-100/80 text-green-600"} overflow-hidden`}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -306,7 +315,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       <AnimatePresence>
         {hoveredAlgo === index && (
           <motion.div
-            className="absolute -z-10 inset-0 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-2xl"
+            className={`absolute -z-10 inset-0 rounded-xl ${isDark ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20" : "bg-gradient-to-r from-blue-200/20 to-pink-200/20"} blur-2xl`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
