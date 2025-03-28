@@ -1,10 +1,90 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { useState } from "react";
 import ArrayVisual from "./ArrayVisual";
 
 const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
-  const handleSimulation = () => {
-    console.log(`Simulating ${algo.name}`); // Placeholder for simulation logic
-    // You can add step-by-step animation logic here using useAnimation if desired
+  const [isSimulating, setIsSimulating] = useState(false);
+  const controls = useAnimation();
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const runSimulation = async () => {
+    setIsSimulating(true);
+
+    if (algo.name === "Merge Sort") {
+      let arr = [...algo.visualData];
+      for (let size = 1; size < arr.length; size *= 2) {
+        for (let left = 0; left < arr.length; left += size * 2) {
+          const mid = Math.min(left + size, arr.length);
+          const right = Math.min(left + size * 2, arr.length);
+
+          // Highlight left half
+          await controls.start((i) => ({
+            scale: i >= left && i < mid ? 1.2 : 1,
+            backgroundColor: i >= left && i < mid ? "#10B981" : "#4F46E5",
+          }));
+          await sleep(500);
+
+          // Highlight right half
+          await controls.start((i) => ({
+            scale: i >= mid && i < right ? 1.2 : 1,
+            backgroundColor: i >= mid && i < right ? "#10B981" : "#4F46E5",
+          }));
+          await sleep(500);
+        }
+      }
+      // Reset
+      await controls.start((i) => ({
+        scale: 1,
+        backgroundColor: "#4F46E5",
+      }));
+    } else if (algo.name === "Kadane's Algorithm") {
+      let maxSoFar = algo.visualData[0];
+      let maxEndingHere = algo.visualData[0];
+      for (let i = 1; i < algo.visualData.length; i++) {
+        maxEndingHere = Math.max(algo.visualData[i], maxEndingHere + algo.visualData[i]);
+        maxSoFar = Math.max(maxSoFar, maxEndingHere);
+
+        // Highlight current subarray
+        await controls.start((idx) => ({
+          scale: idx <= i ? 1.2 : 1,
+          backgroundColor: idx <= i ? "#10B981" : "#4F46E5",
+        }));
+        await sleep(500);
+      }
+      // Reset
+      await controls.start((i) => ({
+        scale: 1,
+        backgroundColor: "#4F46E5",
+      }));
+    } else if (algo.name === "Binary Search") {
+      let left = 0;
+      let right = algo.visualData.length - 1;
+      const target = algo.target;
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+
+        // Highlight current range and mid
+        await controls.start((i) => ({
+          scale: i === mid ? 1.2 : i >= left && i <= right ? 1.1 : 1,
+          backgroundColor:
+            i === mid ? "#10B981" : i >= left && i <= right ? "#4F46E5" : "#4F46E5",
+        }));
+        await sleep(500);
+
+        if (algo.visualData[mid] === target) break;
+        else if (algo.visualData[mid] < target) left = mid + 1;
+        else right = mid - 1;
+      }
+      // Reset
+      await controls.start((i) => ({
+        scale: 1,
+        backgroundColor: "#4F46E5",
+      }));
+    }
+
+    setIsSimulating(false);
   };
 
   return (
@@ -27,21 +107,25 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       <ArrayVisual
         data={algo.visualData}
         highlightIndices={
-          hoveredAlgo === index
+          hoveredAlgo === index && !isSimulating
             ? algo.name === "Binary Search"
-              ? [3] // Highlight target (10)
+              ? [3]
               : algo.name === "Kadane's Algorithm"
-              ? [3, 4, 5, 6] // Highlight max subarray [4, -1, 2, 1]
-              : [0, 1] // Highlight merging in Merge Sort
+              ? [3, 4, 5, 6]
+              : [0, 1]
             : []
         }
+        controls={controls}
       />
 
       <button
-        onClick={handleSimulation}
-        className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-md hover:bg-cyan-600 transition-colors"
+        onClick={runSimulation}
+        disabled={isSimulating}
+        className={`mt-4 px-4 py-2 ${
+          isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
+        } text-white rounded-md transition-colors`}
       >
-        Run Simulation
+        {isSimulating ? "Simulating..." : "Run Simulation"}
       </button>
 
       <AnimatePresence>
