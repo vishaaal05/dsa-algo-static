@@ -56,7 +56,7 @@ function App() {
       right = mid - 1
   return -1`,
       visualData: [2, 3, 4, 10, 40, 50, 60, 70],
-      target: 50,
+      target: 10, // Default target, will be overridden by user input
     },
   ];
 
@@ -69,7 +69,7 @@ function App() {
       } flex flex-col items-center p-6 overflow-hidden`}
     >
       <Header isDark={isDark} toggleTheme={() => setIsDark(!isDark)} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl">
+      <div className="grid grid-cols-1 gap-10 max-w-3xl w-full">
         {algorithms.map((algo) => (
           <AlgorithmCard
             key={algo.index}
