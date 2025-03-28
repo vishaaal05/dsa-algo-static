@@ -198,7 +198,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
 
   return (
     <motion.div
-      className={`relative ${isDark ? "bg-gray-800/50 border-gray-700/50" : "bg-blue-50/80 border-blue-200"} backdrop-blur-md p-6 rounded-xl shadow-xl border hover:shadow-2xl transition-all duration-300 w-full`}
+      className={`relative ${isDark ? "bg-gray-800/50 border-gray-700/50" : "bg-blue-100/80 border-blue-500"} backdrop-blur-md p-6 rounded-xl shadow-xl border hover:shadow-2xl transition-all duration-300 w-full`}
       onMouseEnter={() => setHoveredAlgo(index)}
       onMouseLeave={() => setHoveredAlgo(null)}
       initial={{ opacity: 0, y: 50 }}
@@ -271,7 +271,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
                 ? "bg-gray-500"
                 : isDark
                 ? "bg-cyan-500 hover:bg-cyan-600"
-                : "bg-blue-300 hover:bg-blue-400"
+                : "bg-blue-500 hover:bg-blue-600"
             } text-white rounded-md transition-colors`}
           >
             {isSimulating ? "Simulating..." : "Run Simulation"}
@@ -291,7 +291,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
               ? "bg-gray-500"
               : isDark
               ? "bg-cyan-500 hover:bg-cyan-600"
-              : "bg-blue-300 hover:bg-blue-400"
+              : "bg-blue-500 hover:bg-blue-600"
           } text-white rounded-md transition-colors`}
         >
           {isSimulating ? "Simulating..." : "Run Simulation"}
