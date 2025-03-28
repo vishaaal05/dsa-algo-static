@@ -4,84 +4,140 @@ import ArrayVisual from "./ArrayVisual";
 
 const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
   const [isSimulating, setIsSimulating] = useState(false);
+  const [solvedData, setSolvedData] = useState(null); // Store solved result
   const controls = useAnimation();
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  // Merge Sort implementation
+  const mergeSort = async (arr, start, end) => {
+    if (end - start <= 1) return arr.slice(start, end);
+    const mid = Math.floor((start + end) / 2);
+
+    // Highlight left half
+    await controls.start((i) => ({
+      scale: i >= start && i < mid ? 1.2 : 1,
+      backgroundColor: i >= start && i < mid ? "#10B981" : "#4F46E5",
+    }));
+    await sleep(500);
+
+    // Highlight right half
+    await controls.start((i) => ({
+      scale: i >= mid && i < end ? 1.2 : 1,
+      backgroundColor: i >= mid && i < end ? "#10B981" : "#4F46E5",
+    }));
+    await sleep(500);
+
+    const left = await mergeSort(arr, start, mid);
+    const right = await mergeSort(arr, mid, end);
+    return merge(left, right);
+  };
+
+  const merge = (left, right) => {
+    const result = [];
+    let i = 0, j = 0;
+    while (i < left.length && j < right.length) {
+      result.push(left[i] < right[j] ? left[i++] : right[j++]);
+    }
+    return [...result, ...left.slice(i), ...right.slice(j)];
+  };
+
+  // Kadane's Algorithm implementation
+  const kadanesAlgorithm = async (arr) => {
+    let maxSoFar = arr[0];
+    let maxEndingHere = arr[0];
+    let start = 0, end = 0, tempStart = 0;
+
+    for (let i = 1; i < arr.length; i++) {
+      maxEndingHere = Math.max(arr[i], maxEndingHere + arr[i]);
+      if (maxEndingHere === arr[i]) tempStart = i;
+      if (maxEndingHere > maxSoFar) {
+        maxSoFar = maxEndingHere;
+        start = tempStart;
+        end = i;
+      }
+
+      await controls.start((idx) => ({
+        scale: idx <= i ? 1.2 : 1,
+        backgroundColor: idx <= i ? "#10B981" : "#4F46E5",
+      }));
+      await sleep(500);
+    }
+    return { maxSum: maxSoFar, subarray: arr.slice(start, end + 1) };
+  };
+
+  // Binary Search implementation
+  const binarySearch = async (arr, target) => {
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      await controls.start((i) => ({
+        scale: i === mid ? 1.2 : i >= left && i <= right ? 1.1 : 1,
+        backgroundColor: i === mid ? "#10B981" : i >= left && i <= right ? "#4F46E5" : "#4F46E5",
+      }));
+      await sleep(500);
+
+      if (arr[mid] === target) return mid;
+      else if (arr[mid] < target) left = mid + 1;
+      else right = mid - 1;
+    }
+    return -1;
+  };
+
   const runSimulation = async () => {
     setIsSimulating(true);
+    setSolvedData(null); // Reset solved data
 
     if (algo.name === "Merge Sort") {
-      let arr = [...algo.visualData];
-      for (let size = 1; size < arr.length; size *= 2) {
-        for (let left = 0; left < arr.length; left += size * 2) {
-          const mid = Math.min(left + size, arr.length);
-          const right = Math.min(left + size * 2, arr.length);
-
-          // Highlight left half
-          await controls.start((i) => ({
-            scale: i >= left && i < mid ? 1.2 : 1,
-            backgroundColor: i >= left && i < mid ? "#10B981" : "#4F46E5",
-          }));
-          await sleep(500);
-
-          // Highlight right half
-          await controls.start((i) => ({
-            scale: i >= mid && i < right ? 1.2 : 1,
-            backgroundColor: i >= mid && i < right ? "#10B981" : "#4F46E5",
-          }));
-          await sleep(500);
-        }
-      }
-      // Reset
+      const sortedArray = await mergeSort([...algo.visualData], 0, algo.visualData.length);
       await controls.start((i) => ({
         scale: 1,
         backgroundColor: "#4F46E5",
       }));
+      await sleep(500);
+
+      // Animate solved array
+      setSolvedData(sortedArray);
+      await controls.start((i) => ({
+        scale: 1.2,
+        backgroundColor: "#10B981",
+      }));
+      await sleep(1000);
+      await controls.start((i) => ({ scale: 1 }));
     } else if (algo.name === "Kadane's Algorithm") {
-      let maxSoFar = algo.visualData[0];
-      let maxEndingHere = algo.visualData[0];
-      for (let i = 1; i < algo.visualData.length; i++) {
-        maxEndingHere = Math.max(algo.visualData[i], maxEndingHere + algo.visualData[i]);
-        maxSoFar = Math.max(maxSoFar, maxEndingHere);
-
-        // Highlight current subarray
-        await controls.start((idx) => ({
-          scale: idx <= i ? 1.2 : 1,
-          backgroundColor: idx <= i ? "#10B981" : "#4F46E5",
-        }));
-        await sleep(500);
-      }
-      // Reset
+      const { maxSum, subarray } = await kadanesAlgorithm([...algo.visualData]);
       await controls.start((i) => ({
         scale: 1,
         backgroundColor: "#4F46E5",
       }));
+      await sleep(500);
+
+      // Animate solved subarray
+      setSolvedData(subarray);
+      await controls.start((i) => ({
+        scale: i < subarray.length ? 1.2 : 1,
+        backgroundColor: i < subarray.length ? "#10B981" : "#4F46E5",
+      }));
+      await sleep(1000);
+      await controls.start((i) => ({ scale: 1 }));
     } else if (algo.name === "Binary Search") {
-      let left = 0;
-      let right = algo.visualData.length - 1;
-      const target = algo.target;
-
-      while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-
-        // Highlight current range and mid
-        await controls.start((i) => ({
-          scale: i === mid ? 1.2 : i >= left && i <= right ? 1.1 : 1,
-          backgroundColor:
-            i === mid ? "#10B981" : i >= left && i <= right ? "#4F46E5" : "#4F46E5",
-        }));
-        await sleep(500);
-
-        if (algo.visualData[mid] === target) break;
-        else if (algo.visualData[mid] < target) left = mid + 1;
-        else right = mid - 1;
-      }
-      // Reset
+      const targetIndex = await binarySearch([...algo.visualData], algo.target);
       await controls.start((i) => ({
         scale: 1,
         backgroundColor: "#4F46E5",
       }));
+      await sleep(500);
+
+      // Animate solved index
+      setSolvedData([algo.visualData[targetIndex]]);
+      await controls.start((i) => ({
+        scale: i === targetIndex ? 1.2 : 1,
+        backgroundColor: i === targetIndex ? "#10B981" : "#4F46E5",
+      }));
+      await sleep(1000);
+      await controls.start((i) => ({ scale: 1 }));
     }
 
     setIsSimulating(false);
@@ -105,9 +161,9 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       </div>
 
       <ArrayVisual
-        data={algo.visualData}
+        data={solvedData || algo.visualData} // Show solved data if available
         highlightIndices={
-          hoveredAlgo === index && !isSimulating
+          hoveredAlgo === index && !isSimulating && !solvedData
             ? algo.name === "Binary Search"
               ? [3]
               : algo.name === "Kadane's Algorithm"
@@ -127,6 +183,16 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       >
         {isSimulating ? "Simulating..." : "Run Simulation"}
       </button>
+
+      {solvedData && (
+        <p className="mt-2 text-green-400">
+          {algo.name === "Merge Sort"
+            ? "Sorted Array"
+            : algo.name === "Kadane's Algorithm"
+            ? "Max Subarray"
+            : "Target Found"}
+        </p>
+      )}
 
       <AnimatePresence>
         {hoveredAlgo === index && (
