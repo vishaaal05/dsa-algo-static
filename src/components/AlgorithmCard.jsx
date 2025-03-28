@@ -4,24 +4,22 @@ import ArrayVisual from "./ArrayVisual";
 
 const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
   const [isSimulating, setIsSimulating] = useState(false);
-  const [solvedData, setSolvedData] = useState(null); // Store solved result
+  const [solvedData, setSolvedData] = useState(null);
+  const [searchTarget, setSearchTarget] = useState(algo.target || ""); // For Binary Search input
   const controls = useAnimation();
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // Merge Sort implementation
   const mergeSort = async (arr, start, end) => {
     if (end - start <= 1) return arr.slice(start, end);
     const mid = Math.floor((start + end) / 2);
 
-    // Highlight left half
     await controls.start((i) => ({
       scale: i >= start && i < mid ? 1.2 : 1,
       backgroundColor: i >= start && i < mid ? "#10B981" : "#4F46E5",
     }));
     await sleep(500);
 
-    // Highlight right half
     await controls.start((i) => ({
       scale: i >= mid && i < end ? 1.2 : 1,
       backgroundColor: i >= mid && i < end ? "#10B981" : "#4F46E5",
@@ -42,7 +40,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
     return [...result, ...left.slice(i), ...right.slice(j)];
   };
 
-  // Kadane's Algorithm implementation
   const kadanesAlgorithm = async (arr) => {
     let maxSoFar = arr[0];
     let maxEndingHere = arr[0];
@@ -66,7 +63,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
     return { maxSum: maxSoFar, subarray: arr.slice(start, end + 1) };
   };
 
-  // Binary Search implementation
   const binarySearch = async (arr, target) => {
     let left = 0;
     let right = arr.length - 1;
@@ -88,7 +84,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
   const runSimulation = async () => {
     setIsSimulating(true);
-    setSolvedData(null); // Reset solved data
+    setSolvedData(null);
 
     if (algo.name === "Merge Sort") {
       const sortedArray = await mergeSort([...algo.visualData], 0, algo.visualData.length);
@@ -98,7 +94,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       }));
       await sleep(500);
 
-      // Animate solved array
       setSolvedData(sortedArray);
       await controls.start((i) => ({
         scale: 1.2,
@@ -114,7 +109,6 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       }));
       await sleep(500);
 
-      // Animate solved subarray
       setSolvedData(subarray);
       await controls.start((i) => ({
         scale: i < subarray.length ? 1.2 : 1,
@@ -123,18 +117,18 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       await sleep(1000);
       await controls.start((i) => ({ scale: 1 }));
     } else if (algo.name === "Binary Search") {
-      const targetIndex = await binarySearch([...algo.visualData], algo.target);
+      const targetNum = parseInt(searchTarget, 10) || algo.target; // Use user input or default
+      const targetIndex = await binarySearch([...algo.visualData], targetNum);
       await controls.start((i) => ({
         scale: 1,
         backgroundColor: "#4F46E5",
       }));
       await sleep(500);
 
-      // Animate solved index
-      setSolvedData([algo.visualData[targetIndex]]);
+      setSolvedData(targetIndex !== -1 ? [algo.visualData[targetIndex]] : ["Not Found"]);
       await controls.start((i) => ({
-        scale: i === targetIndex ? 1.2 : 1,
-        backgroundColor: i === targetIndex ? "#10B981" : "#4F46E5",
+        scale: targetIndex === i ? 1.2 : 1,
+        backgroundColor: targetIndex === i ? "#10B981" : targetIndex === -1 ? "#EF4444" : "#4F46E5",
       }));
       await sleep(1000);
       await controls.start((i) => ({ scale: 1 }));
@@ -145,7 +139,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
   return (
     <motion.div
-      className="relative bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-xl border border-gray-700/50 hover:shadow-2xl transition-all duration-300"
+      className="relative bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-xl border border-gray-700/50 hover:shadow-2xl transition-all duration-300 w-full"
       onMouseEnter={() => setHoveredAlgo(index)}
       onMouseLeave={() => setHoveredAlgo(null)}
       initial={{ opacity: 0, y: 50 }}
@@ -161,7 +155,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       </div>
 
       <ArrayVisual
-        data={solvedData || algo.visualData} // Show solved data if available
+        data={solvedData || algo.visualData}
         highlightIndices={
           hoveredAlgo === index && !isSimulating && !solvedData
             ? algo.name === "Binary Search"
@@ -174,15 +168,38 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
         controls={controls}
       />
 
-      <button
-        onClick={runSimulation}
-        disabled={isSimulating}
-        className={`mt-4 px-4 py-2 ${
-          isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
-        } text-white rounded-md transition-colors`}
-      >
-        {isSimulating ? "Simulating..." : "Run Simulation"}
-      </button>
+      {algo.name === "Binary Search" && (
+        <div className="mt-4 flex space-x-2">
+          <input
+            type="number"
+            value={searchTarget}
+            onChange={(e) => setSearchTarget(e.target.value)}
+            placeholder="Enter number to search"
+            className="p-2 rounded-md text-black w-32"
+          />
+          <button
+            onClick={runSimulation}
+            disabled={isSimulating}
+            className={`px-4 py-2 ${
+              isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
+            } text-white rounded-md transition-colors`}
+          >
+            {isSimulating ? "Simulating..." : "Run Simulation"}
+          </button>
+        </div>
+      )}
+
+      {algo.name !== "Binary Search" && (
+        <button
+          onClick={runSimulation}
+          disabled={isSimulating}
+          className={`mt-4 px-4 py-2 ${
+            isSimulating ? "bg-gray-500" : "bg-cyan-500 hover:bg-cyan-600"
+          } text-white rounded-md transition-colors`}
+        >
+          {isSimulating ? "Simulating..." : "Run Simulation"}
+        </button>
+      )}
 
       {solvedData && (
         <p className="mt-2 text-green-400">
@@ -190,6 +207,8 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
             ? "Sorted Array"
             : algo.name === "Kadane's Algorithm"
             ? "Max Subarray"
+            : solvedData[0] === "Not Found"
+            ? "Target Not Found"
             : "Target Found"}
         </p>
       )}
