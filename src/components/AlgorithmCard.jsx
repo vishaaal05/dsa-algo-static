@@ -1,5 +1,5 @@
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ArrayVisual from "./ArrayVisual";
 
 const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
@@ -10,47 +10,60 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // Reset controls when simulation ends
-  useEffect(() => {
-    if (!isSimulating && solvedData) {
-      controls.start((i) => ({
-        scale: 1,
-        backgroundColor: "#4F46E5",
-      }));
-    }
-  }, [isSimulating, solvedData, controls]);
-
   const mergeSort = async (arr, start, end) => {
-    if (end - start <= 1) return arr.slice(start, end);
+    console.log(`mergeSort called with start: ${start}, end: ${end}`);
+    if (end - start <= 1) {
+      console.log(`Base case reached: ${arr.slice(start, end)}`);
+      return arr.slice(start, end);
+    }
     const mid = Math.floor((start + end) / 2);
 
-    await controls.start((i) => ({
-      scale: i >= start && i < mid ? 1.2 : 1,
-      backgroundColor: i >= start && i < mid ? "#10B981" : "#4F46E5",
-    }));
-    await sleep(500);
+    // Temporarily disable recursive animations to isolate the issue
+    // await controls.start((i) => ({
+    //   scale: i >= start && i < mid ? 1.2 : 1,
+    //   backgroundColor: i >= start && i < mid ? "#10B981" : "#4F46E5",
+    // }));
+    // await sleep(500);
 
-    await controls.start((i) => ({
-      scale: i >= mid && i < end ? 1.2 : 1,
-      backgroundColor: i >= mid && i < end ? "#10B981" : "#4F46E5",
-    }));
-    await sleep(500);
+    // await controls.start((i) => ({
+    //   scale: i >= mid && i < end ? 1.2 : 1,
+    //   backgroundColor: i >= mid && i < end ? "#10B981" : "#4F46E5",
+    // }));
+    // await sleep(500);
 
     const left = await mergeSort(arr, start, mid);
     const right = await mergeSort(arr, mid, end);
-    return merge(left, right);
+
+    const merged = merge(left, right);
+    console.log(`Merged result for ${start}-${end}: ${merged}`);
+    for (let i = 0; i < merged.length; i++) {
+      arr[start + i] = merged[i];
+    }
+
+    // Highlight merged section
+    await controls.start((i) => ({
+      scale: i >= start && i < end ? 1.2 : 1,
+      backgroundColor: i >= start && i < end ? "#10B981" : "#4F46E5",
+    }));
+    await sleep(500);
+
+    return arr.slice(start, end);
   };
 
   const merge = (left, right) => {
+    console.log(`Merging left: ${left}, right: ${right}`);
     const result = [];
     let i = 0, j = 0;
     while (i < left.length && j < right.length) {
       result.push(left[i] < right[j] ? left[i++] : right[j++]);
     }
-    return [...result, ...left.slice(i), ...right.slice(j)];
+    const merged = [...result, ...left.slice(i), ...right.slice(j)];
+    console.log(`Merge result: ${merged}`);
+    return merged;
   };
 
   const kadanesAlgorithm = async (arr) => {
+    console.log("Starting Kadane's Algorithm");
     let maxSoFar = arr[0];
     let maxEndingHere = arr[0];
     let start = 0, end = 0, tempStart = 0;
@@ -70,10 +83,12 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       }));
       await sleep(500);
     }
+    console.log(`Kadane's result: maxSum=${maxSoFar}, subarray=${arr.slice(start, end + 1)}`);
     return { maxSum: maxSoFar, subarray: arr.slice(start, end + 1) };
   };
 
   const binarySearch = async (arr, target) => {
+    console.log(`Starting Binary Search for target: ${target}`);
     let left = 0;
     let right = arr.length - 1;
 
@@ -85,57 +100,95 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index }) => {
       }));
       await sleep(500);
 
-      if (arr[mid] === target) return mid;
+      if (arr[mid] === target) {
+        console.log(`Target ${target} found at index: ${mid}`);
+        return mid;
+      }
       else if (arr[mid] < target) left = mid + 1;
       else right = mid - 1;
     }
+    console.log(`Target ${target} not found`);
     return -1;
   };
 
   const runSimulation = async () => {
-    setIsSimulating(true);
-    setSolvedData(null); // Clear previous solved data
-
-    // Reset controls to initial state
-    await controls.start((i) => ({
-      scale: 1,
-      backgroundColor: "#4F46E5",
-    }));
-
-    if (algo.name === "Merge Sort") {
-      const sortedArray = await mergeSort([...algo.visualData], 0, algo.visualData.length);
-      await sleep(500);
-
-      setSolvedData(sortedArray);
-      await controls.start((i) => ({
-        scale: 1.2,
-        backgroundColor: "#10B981",
-      }));
-      await sleep(1000);
-    } else if (algo.name === "Kadane's Algorithm") {
-      const { maxSum, subarray } = await kadanesAlgorithm([...algo.visualData]);
-      await sleep(500);
-
-      setSolvedData(subarray);
-      await controls.start((i) => ({
-        scale: i < subarray.length ? 1.2 : 1,
-        backgroundColor: i < subarray.length ? "#10B981" : "#4F46E5",
-      }));
-      await sleep(1000);
-    } else if (algo.name === "Binary Search") {
-      const targetNum = parseInt(searchTarget, 10) || algo.target;
-      const targetIndex = await binarySearch([...algo.visualData], targetNum);
-      await sleep(500);
-
-      setSolvedData(targetIndex !== -1 ? [algo.visualData[targetIndex]] : ["Not Found"]);
-      await controls.start((i) => ({
-        scale: targetIndex === i ? 1.2 : 1,
-        backgroundColor: targetIndex === i ? "#10B981" : targetIndex === -1 ? "#EF4444" : "#4F46E5",
-      }));
-      await sleep(1000);
+    if (isSimulating) {
+      console.log("Simulation already in progress, exiting");
+      return;
     }
+    console.log(`Starting simulation for ${algo.name}`);
+    setIsSimulating(true);
+    setSolvedData(null);
 
-    setIsSimulating(false);
+    try {
+      console.log("Resetting elements");
+      await controls.start({
+        scale: 1,
+        backgroundColor: "#4F46E5",
+      });
+      await sleep(200);
+      console.log("Reset complete");
+
+      if (algo.name === "Merge Sort") {
+        console.log("Running Merge Sort");
+        const sortedArray = await mergeSort([...algo.visualData], 0, algo.visualData.length);
+        console.log("Merge Sort completed, sorted array:", sortedArray);
+        await controls.start({
+          scale: 1,
+          backgroundColor: "#4F46E5",
+        });
+        await sleep(500);
+
+        setSolvedData(sortedArray);
+        await controls.start({
+          scale: 1.2,
+          backgroundColor: "#10B981",
+        });
+        await sleep(1000);
+        await controls.start({ scale: 1 });
+      } else if (algo.name === "Kadane's Algorithm") {
+        console.log("Running Kadane's Algorithm");
+        const { maxSum, subarray } = await kadanesAlgorithm([...algo.visualData]);
+        console.log("Kadane's Algorithm completed");
+        await controls.start({
+          scale: 1,
+          backgroundColor: "#4F46E5",
+        });
+        await sleep(500);
+
+        setSolvedData(subarray);
+        await controls.start((i) => ({
+          scale: i < subarray.length ? 1.2 : 1,
+          backgroundColor: i < subarray.length ? "#10B981" : "#4F46E5",
+        }));
+        await sleep(1000);
+        await controls.start({ scale: 1 });
+      } else if (algo.name === "Binary Search") {
+        console.log("Running Binary Search");
+        const targetNum = parseInt(searchTarget, 10) || algo.target;
+        const targetIndex = await binarySearch([...algo.visualData], targetNum);
+        console.log("Binary Search completed");
+        await controls.start({
+          scale: 1,
+          backgroundColor: "#4F46E5",
+        });
+        await sleep(500);
+
+        setSolvedData(targetIndex !== -1 ? [algo.visualData[targetIndex]] : ["Not Found"]);
+        await controls.start((i) => ({
+          scale: targetIndex === i ? 1.2 : 1,
+          backgroundColor: targetIndex === i ? "#10B981" : targetIndex === -1 ? "#EF4444" : "#4F46E5",
+        }));
+        await sleep(1000);
+        await controls.start({ scale: 1 });
+      }
+      console.log("Simulation completed successfully");
+    } catch (error) {
+      console.error("Simulation error:", error);
+    } finally {
+      console.log("Setting isSimulating to false");
+      setIsSimulating(false);
+    }
   };
 
   return (

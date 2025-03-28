@@ -31,10 +31,8 @@ function App() {
   maxSoFar = arr[0]
   maxEndingHere = arr[0]
   for i from 1 to arr.length-1:
-    maxEndingHere = max(arr[i], 
-    maxEndingHere + arr[i])
-    maxSoFar = max(maxSoFar, 
-    maxEndingHere)
+    maxEndingHere = max(arr[i],  maxEndingHere + arr[i])
+    maxSoFar = max(maxSoFar, maxEndingHere)
   return maxSoFar`,
       visualData: [-2, 1, -3, 4, -1, 2, 1, -5, 4],
     },
@@ -56,7 +54,7 @@ function App() {
       right = mid - 1
   return -1`,
       visualData: [2, 3, 4, 10, 40, 50, 60, 70],
-      target: 50, // Changed from 10 to 50
+      target: 50,
     },
   ];
 
