@@ -1,8 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import Header from "./components/Header";
+import AlgorithmCard from "./components/AlgorithmCard";
+import Footer from "./components/Footer";
 
 function App() {
   const [hoveredAlgo, setHoveredAlgo] = useState(null);
+  const [isDark, setIsDark] = useState(true);
 
   const algorithms = [
     {
@@ -57,105 +60,27 @@ function App() {
     },
   ];
 
-  const ArrayVisual = ({ data, highlightIndices = [] }) => (
-    <div className="flex space-x-2 mt-4">
-      {data.map((num, idx) => (
-        <motion.div
-          key={idx}
-          className={`w-10 h-10 flex items-center justify-center rounded-md text-white font-bold ${
-            highlightIndices.includes(idx) ? "bg-green-500" : "bg-indigo-600"
-          }`}
-          animate={{ scale: highlightIndices.includes(idx) ? 1.2 : 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {num}
-        </motion.div>
-      ))}
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 text-white flex flex-col items-center p-6 overflow-hidden">
-      <motion.h1
-        initial={{ opacity: 0, y: -100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, type: "spring" }}
-        className="text-6xl font-extrabold mb-16 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-pink-500"
-      >
-        Algorithm Odyssey
-      </motion.h1>
-
+    <div
+      className={`min-h-screen ${
+        isDark
+          ? "bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 text-white"
+          : "bg-gradient-to-br from-gray-100 via-indigo-100 to-purple-100 text-gray-900"
+      } flex flex-col items-center p-6 overflow-hidden`}
+    >
+      <Header isDark={isDark} toggleTheme={() => setIsDark(!isDark)} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl">
         {algorithms.map((algo) => (
-          <motion.div
+          <AlgorithmCard
             key={algo.index}
-            className="relative bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-xl border border-gray-700/50 hover:shadow-2xl transition-all duration-300"
-            onMouseEnter={() => setHoveredAlgo(algo.index)}
-            onMouseLeave={() => setHoveredAlgo(null)}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: algo.index * 0.2, duration: 0.6 }}
-          >
-            <h2 className="text-3xl font-bold mb-3 text-cyan-300">{algo.name}</h2>
-            <p className="text-gray-300 mb-4">{algo.desc}</p>
-
-            <div className="mb-4">
-              <span className="text-sm text-gray-400">Time Complexity: </span>
-              <span className="text-lg font-semibold text-yellow-400">{algo.time}</span>
-            </div>
-
-            <ArrayVisual
-              data={algo.visualData}
-              highlightIndices={
-                hoveredAlgo === algo.index
-                  ? algo.name === "Binary Search"
-                    ? [3] // Highlight target (10)
-                    : algo.name === "Kadane's Algorithm"
-                    ? [3, 4, 5, 6] // Highlight max subarray [4, -1, 2, 1]
-                    : [0, 1] // Highlight merging in Merge Sort
-                  : []
-              }
-            />
-
-            {/* AnimatePresence for smooth exit */}
-            <AnimatePresence>
-              {hoveredAlgo === algo.index && (
-                <motion.pre
-                  className="bg-gray-900/80 p-4 mt-4 rounded-md text-sm text-green-400 overflow-hidden"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }} // Slow and smooth
-                >
-                  {algo.pseudo}
-                </motion.pre>
-              )}
-            </AnimatePresence>
-
-            {/* AnimatePresence for background glow */}
-            <AnimatePresence>
-              {hoveredAlgo === algo.index && (
-                <motion.div
-                  className="absolute -z-10 inset-0 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-2xl"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }} // Slow and smooth
-                />
-              )}
-            </AnimatePresence>
-          </motion.div>
+            algo={algo}
+            hoveredAlgo={hoveredAlgo}
+            setHoveredAlgo={setHoveredAlgo}
+            index={algo.index}
+          />
         ))}
       </div>
-
-      <motion.footer
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="mt-36 text-gray-400 text-sm flex sticky bottom-0"
-      >
-        Made with ❤️ | © 2025
-      </motion.footer>
+      <Footer />
     </div>
   );
 }
