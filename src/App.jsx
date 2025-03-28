@@ -31,8 +31,10 @@ function App() {
   maxSoFar = arr[0]
   maxEndingHere = arr[0]
   for i from 1 to arr.length-1:
-    maxEndingHere = max(arr[i],  maxEndingHere + arr[i])
-    maxSoFar = max(maxSoFar, maxEndingHere)
+    maxEndingHere = max(arr[i], 
+    maxEndingHere + arr[i])
+    maxSoFar = max(maxSoFar, 
+    maxEndingHere)
   return maxSoFar`,
       visualData: [-2, 1, -3, 4, -1, 2, 1, -5, 4],
     },
@@ -63,7 +65,7 @@ function App() {
       className={`min-h-screen ${
         isDark
           ? "bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 text-white"
-          : "bg-gradient-to-br from-gray-100 via-indigo-100 to-purple-100 text-gray-900"
+          : "bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100 text-gray-800"
       } flex flex-col items-center p-6 overflow-hidden`}
     >
       <Header isDark={isDark} toggleTheme={() => setIsDark(!isDark)} />
@@ -75,6 +77,7 @@ function App() {
             hoveredAlgo={hoveredAlgo}
             setHoveredAlgo={setHoveredAlgo}
             index={algo.index}
+            isDark={isDark}
           />
         ))}
       </div>
