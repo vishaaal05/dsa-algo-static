@@ -33,7 +33,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
       backgroundColor: i >= start && i < end ? (isDark ? "#10B981" : "#F9A8D4") : (isDark ? "#4F46E5" : "#C4B5FD"),
     }));
     console.log(`Animation for ${start}-${end} completed`);
-    await sleep(500);
+    await sleep(800);
 
     return arr.slice(start, end);
   };
@@ -118,7 +118,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
         controls.start({
           scale: 1,
           backgroundColor: isDark ? "#4F46E5" : "#C4B5FD",
-          transition: { duration: 0.3 },
+          transition: { duration: 0.5 },
         }).then(resolve).catch((err) => {
           console.error("Reset animation error:", err);
           resolve();
@@ -144,7 +144,7 @@ const AlgorithmCard = ({ algo, hoveredAlgo, setHoveredAlgo, index, isDark }) => 
           scale: 1.2,
           backgroundColor: isDark ? "#10B981" : "#F9A8D4",
         });
-        await sleep(1000);
+        await sleep(1500);
         await controls.start({ scale: 1 });
         console.log("Solved array animation completed");
       } else if (algo.name === "Kadane's Algorithm") {
